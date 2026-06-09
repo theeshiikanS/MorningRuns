@@ -13,11 +13,9 @@ var BALL_RUN_DATA = {
         ["Shaj", "Chuckels", "0-0", "--", "--", "--", ""],
         ["Ayaan", "yn-", "0-0", "--", "--", "--", ""],
         ["Sharun", "mid", "0-0", "--", "--", "--", ""],
-        ["Lakzen", "Liability+", "0-0", "--", "--", "--", ""],
-        ["Ak", "Mid", "0-0", "--", "--", "--", ""],
     ],
     history: [
         // Format: { desc: "What changed", date: "Date", author: "Who", reviewers: "Who reviewed" }
-        { desc: "Initial release", date: "6/5/2026", author: "KM", reviewers: "CB, SR" }
+        { desc: "Initial release", date: "6/5/2026", author: "TS", reviewers: "TS" }
     ]
 };
