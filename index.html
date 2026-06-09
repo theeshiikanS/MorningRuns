@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Ball Run Rankings</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --border-color: #e2e8f0;
+            --text-main: #333333;
+            --text-muted: #666666;
+            
+            /* Tier Colors */
+            --tier-carry: #2ecc71;
+            --tier-mid: #f1c40f;
+            --tier-body: #e67e22;
+            --tier-liability: #e74c3c;
+            --tier-cardio: #95a5a6;
+            --tier-yn: #9b59b6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+
+        /* Table & Links */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); }
+        th { background-color: #f8fafc; color: var(--primary-color); font-weight: 600; }
+        tr:hover { background-color: #f8fafc; }
+
+        .player-link {
+            color: #2980b9;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .player-link:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        .record { font-family: monospace; font-size: 1rem; font-weight: bold; }
+
+        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-item { padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        .history-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; }
+        .history-desc { font-size: 0.95rem; font-weight: 500; }
+        .history-people { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
+
+        /* Profile Modal Window */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 12px; right: 18px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .close-modal:hover { color: #000; }
+
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--border-color);
+            margin-bottom: 15px;
+            background-color: #e2e8f0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-box-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        .stat-box-value { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Team Ball Run Rankings</h1>
+    </header>
+
+    <div class="dashboard-grid">
+        <main class="card">
+            <h2>Player Leaderboard <span style="font-size:0.85rem; color:var(--text-muted); font-weight:normal;">(Click a name to see bio stats)</span></h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Rankings</th>
+                            <th>Record</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </main>
+
+        <aside class="dashboard-sidebar">
+            <div class="card">
+                <h2>Tier Reference Guide</h2>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div><span class="badge" style="background: rgba(155, 89, 182, 0.15); color: #8e44ad;">yn</span> (Peak)</div>
+                    <div><span class="badge" style="background: rgba(46, 204, 113, 0.15); color: #27ae60;">Carry</span></div>
+                    <div><span class="badge" style="background: rgba(241, 196, 15, 0.15); color: #b7950b;">Mid</span></div>
+                    <div><span class="badge" style="background: rgba(230, 126, 34, 0.15); color: #d35400;">Body</span></div>
+                    <div><span class="badge" style="background: rgba(231, 76, 60, 0.15); color: #c0392b;">Liability</span></div>
+                    <div><span class="badge" style="background: rgba(149, 165, 166, 0.15); color: #7f8c8d;">Cardio</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Revision History</h2>
+                <ul class="history-list" id="historyList"></ul>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<div id="playerModal" class="modal-overlay" onclick="closeModalWindow(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="document.getElementById('playerModal').style.display='none'">&times;</span>
+        <img id="modalImg" src="https://www.w3schools.com/howto/img_avatar.png" alt="Player Headshot" class="profile-img">
+        <h2 id="modalName" style="margin: 0; color: var(--primary-color);"></h2>
+        <div id="modalBadgeContainer" style="margin: 8px 0 15px 0;"></div>
+        
+        <p style="margin: 5px 0; font-size: 1rem;"><strong>Track Record:</strong> <span id="modalRecord" class="record"></span></p>
+
+        <div class="stats-grid">
+            <div>
+                <div class="stat-box-title">Height</div>
+                <div id="modalHeight" class="stat-box-value">--</div>
+            </div>
+            <div>
+                <div class="stat-box-title">Weight</div>
+                <div id="modalWeight" class="stat-box-value">--</div>
+            </div>
+            <div>
+                <div class="stat-box-title">Wingspan</div>
+                <div id="modalWingspan" class="stat-box-value">--</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="data.js"></script>
+
+<script>
+    function getBadgeClass(rankingStr) {
+        const lower = rankingStr.toLowerCase();
+        if (lower.includes('carry')) return 'background: rgba(46, 204, 113, 0.15); color: #27ae60;';
+        if (lower.includes('mid')) return 'background: rgba(241, 196, 15, 0.15); color: #b7950b;';
+        if (lower.includes('body')) return 'background: rgba(230, 126, 34, 0.15); color: #d35400;';
+        if (lower.includes('liability')) return 'background: rgba(231, 76, 60, 0.15); color: #c0392b;';
+        if (lower.includes('cardio')) return 'background: rgba(149, 165, 166, 0.15); color: #7f8c8d;';
+        if (lower.includes('yn')) return 'background: rgba(155, 89, 182, 0.15); color: #8e44ad;';
+        return 'background: rgba(52, 152, 219, 0.15); color: #2980b9;'; 
+    }
+
+    function showPlayerModal(idx) {
+        if (!window.BALL_RUN_DATA || !BALL_RUN_DATA.players) return;
+        const player = BALL_RUN_DATA.players[idx];
+        
+        document.getElementById('modalName').innerText = player[0];
+        document.getElementById('modalRecord').innerText = player[2];
+        document.getElementById('modalHeight').innerText = player[3] || '--';
+        document.getElementById('modalWeight').innerText = player[4] || '--';
+        document.getElementById('modalWingspan').innerText = player[5] || '--';
+        
+        const imgUrl = player[6] || 'https://www.w3schools.com/howto/img_avatar.png'; 
+        document.getElementById('modalImg').src = imgUrl;
+
+        const badgeContainer = document.getElementById('modalBadgeContainer');
+        badgeContainer.innerHTML = `<span class="badge" style="${getBadgeClass(player[1])}">${player[1]}</span>`;
+
+        document.getElementById('playerModal').style.display = 'flex';
+    }
+
+    function closeModalWindow(event) {
+        if(event.target.id === 'playerModal') {
+            document.getElementById('playerModal').style.display = 'none';
+        }
+    }
+
+    function renderDashboard() {
+        // Validation safety net if data.js file isn't linked up correctly
+        if (!window.BALL_RUN_DATA) {
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="3" style="color: red; text-align:center; font-weight:bold; padding:30px;">Error: data.js file not detected in this folder!</td></tr>`;
+            return;
+        }
+
+        // Render Leaderboard Rows
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = '';
+        BALL_RUN_DATA.players.forEach((row, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><a class="player-link" onclick="showPlayerModal(${idx})">${row[0]}</a></td>
+                <td><span class="badge" style="${getBadgeClass(row[1])}">${row[1]}</span></td>
+                <td class="record">${row[2]}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        // Render Revision History Items
+        const historyList = document.getElementById('historyList');
+        historyList.innerHTML = '';
+        BALL_RUN_DATA.history.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'history-item';
+            li.innerHTML = `
+                <div class="history-meta"><span><strong>${item.date}</strong></span><span>By: ${item.author}</span></div>
+                <div class="history-desc">${item.desc}</div>
+                ${item.reviewers ? `<div class="history-people">Reviewers: ${item.reviewers}</div>` : ''}
+            `;
+            historyList.appendChild(li);
+        });
+    }
+
+    // Launch UI paint routine immediately
+    renderDashboard();
+</script>
+</body>
+</html>
